@@ -19,21 +19,21 @@ const solutions = [
 
 export default function MenuPopover({ user }) {
   return (
-    <Popover className="">
+    <Popover className="w-1/2">
       {({ open }) => (
         <>
           <Popover.Button
             className={`
                 ${open ? "text-black" : "text-black/90"}
-                w-[20%] py-[6px] group   
-                hover:text-white focus:outline-none focus-visible:ring-2
-                 focus-visible:ring-white/75`}
+                 py-[6px] group   
+                hover:text-white focus:outline-none `
+                }
           >
-            <span className="w-[20%] h-full">
+            <span className="">
               <img
                 src={user.picture}
                 alt={user.nickname}
-                className="rounded-full w-full h-full"
+                className="rounded-full w-6 h-6"
               />
             </span>
           </Popover.Button>
@@ -47,7 +47,7 @@ export default function MenuPopover({ user }) {
             leaveTo="opacity-0 translate-y-1"
           >
             <Popover.Panel
-              className="absolute left-[85%] z-10 mt-3 w-[20%] -translate-x-1/2 
+              className="absolute left-[90%] z-10 mt-3 w-[20%] -translate-x-1/2 
             transform px-4 "
             >
               <div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5">

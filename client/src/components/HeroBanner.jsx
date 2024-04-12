@@ -21,7 +21,7 @@ const HeroBanner = () => {
         <SwiperSlide>
           <div className="w-full h-[60vh] bg-slate-500 relative">
             <img
-              loading="lazy"
+              loading="eager"
               width={200}
               height={200}
               src={sofa}
@@ -45,7 +45,7 @@ const HeroBanner = () => {
         <SwiperSlide>
           <div className="w-full h-[60vh] bg-slate-500 relative">
             <img
-              loading="lazy"
+              loading="eager"
               width={200}
               height={200}
               src={samsung}

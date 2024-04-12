@@ -23,7 +23,7 @@ export default function Search() {
         }/products?keyword=${query}&category=${""}`
       ); // Replace with your actual API endpoint
       setProducts(response.data.products); // Update the products state with the fetched data
-      // console.log(response);
+      // console.log(response.data.products);
     };
 
     fetchProducts();

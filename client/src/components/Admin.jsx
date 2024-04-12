@@ -12,16 +12,16 @@ const Admin = () => {
     stock: 0,
     featured: "",
   });
-  // console.log(form);
+  console.log(form);
   const handleSubmit = async (e) => {
-    console.log(process.env.VITE_APP_DOMAIN);
     e.preventDefault();
     console.log("entered submit");
     const response = await axios.post(
-      `${process.env.VITE_APP_DOMAIN}/admin/product/create`,
+      `${import.meta.env.VITE_APP_DOMAIN}/admin/product/create`,
       form
     );
     alert(response.data.success);
+   
   };
   const handleImageUploadAndSubmit = async (e) => {
     const files = e.target.files;
@@ -34,7 +34,9 @@ const Admin = () => {
     });
 
     const response = await axios.post(
-      `https://api.cloudinary.com/v1_1/${process.env.VITE_APP_CLOUDINARY_CLOUD_NAME}/image/upload`,
+      `https://api.cloudinary.com/v1_1/${
+        import.meta.env.VITE_APP_CLOUDINARY_CLOUD_NAME
+      }/image/upload`,
       formData
     );
     console.log(response);

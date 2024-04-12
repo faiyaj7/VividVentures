@@ -4,23 +4,24 @@ import App from "./App.jsx";
 import "./index.css";
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
-import store from "./store/store";
-import { Elements } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
+import { PersistGate } from "redux-persist/integration/react";
+import { store } from "./store/store";
+import { persistStore } from "redux-persist";
+
 import Auth0ProviderWithHistory from "./auth/AuthProvider";
-// const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
-// const options = {
-//   clientSecret: `${process.env.REACT_APP_STRIPE_SECRET_KEY}`,
-// };
+import Loader from "./components/Loader.jsx";
+let persistor = persistStore(store);
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
       <Provider store={store}>
-        <Auth0ProviderWithHistory>
-          {/* <Elements stripe={stripePromise} options={options}> */}
-          <App />
-          {/* </Elements> */}
-        </Auth0ProviderWithHistory>
+        <React.Suspense fallback={<Loader />}>
+          <PersistGate loading={null} persistor={persistor}>
+            <Auth0ProviderWithHistory>
+              <App />
+            </Auth0ProviderWithHistory>
+          </PersistGate>
+        </React.Suspense>
       </Provider>
     </BrowserRouter>
   </React.StrictMode>

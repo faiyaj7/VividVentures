@@ -62,10 +62,9 @@ const FeaturedProducts = () => {
       </div>
 
       {/* Products based on category */}
-      <div className="w-[65%] grid grid-cols-2 lg:grid-cols-4 gap-5 place-items-center">
-        {" "}
-        {products.map((product, index) => (
-          <AnimatePresence>
+      <div className="w-[90%] lg:w-[65%] grid grid-cols-2 lg:grid-cols-4 gap-5 place-items-center">
+        {products.map((product) => (
+          <AnimatePresence key={product._id}>
             <motion.div
               layout
               initial={{ opacity: 0 }}

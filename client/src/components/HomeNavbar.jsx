@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IoCartOutline, IoSearchOutline } from "react-icons/io5";
 import { FaHome } from "react-icons/fa";
 import { IoMdContact } from "react-icons/io";
@@ -14,7 +14,7 @@ import Login from "./pages/Login";
 import Search from "./Search";
 import { useSelector } from "react-redux";
 import Logo from "./Logo";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useAnimation } from "framer-motion";
 const NavLink = ({
   title,
   singleItem = "",
@@ -56,6 +56,7 @@ const HomeNavbar = () => {
     (state) => state.productSlice.totalQuantities
   );
   const [menuOpen, setMenuOpen] = useState(false);
+
   const handleToggleMenu = () => {
     if (menuOpen) {
       setMenuOpen(false);
@@ -80,12 +81,14 @@ const HomeNavbar = () => {
     hidden: { x: "-100vw", opacity: 0 },
     visible: { x: 0, opacity: 1, transition: { duration: 0.3 } },
   };
+
+
   return (
-    <div className="flexContainer flex-col px-4 gap-7">
+    <div className="flexContainer !justify-between flex-col px-4 gap-7">
       {/* First Navbar */}
       <div className=" flexContainer mt-5 w-full">
         {/* Logo */}
-        <Link to="/" className="w-[20%] lg:w-[5%]">
+        <Link to="/" className="w-[20%] sm:w-[10%] lg:w-[5%]">
           <Logo />
         </Link>
         {/* Search Button */}
@@ -96,7 +99,10 @@ const HomeNavbar = () => {
         <div className="hidden lg:flexContainer gap-6">
           <Link to="/cart" className="flexContainer gap-2">
             <IoCartOutline size={30} />
-            <span className="text-white rounded-full bg-orange-600 w-1/2 text-center  p-[2px] text-xs">
+            <span
+              
+              className="text-white rounded-full bg-orange-600 w-1/2 text-center  p-[2px] text-xs"
+            >
               {totalQuantities}
             </span>
           </Link>

@@ -10,26 +10,39 @@ import {
   toggleCartItems,
 } from "../../store/productSlice";
 import { handleCategoryBasedFilter } from "../../axios";
-import {
-  useStripe,
-  useElements,
-  PaymentElement,
-} from "@stripe/react-stripe-js";
 import useDocumentTitle from "../ComponentTitle";
+import { loadStripe } from "@stripe/stripe-js";
+import axios from "axios";
+import { useAuth0 } from "@auth0/auth0-react";
+
 const Cart = () => {
   useDocumentTitle("VividVentures | Cart");
   const qty = useSelector((state) => state.productSlice.qty);
   const totalPrice = useSelector((state) => state.productSlice.totalPrice);
   const cart = useSelector((state) => state.productSlice.cart);
-  // console.log("the cart items are", cart);
-  const totalQuantities = useSelector(
-    (state) => state.productSlice.totalQuantities
-  );
   const [product, setproduct] = useState([]);
   const dispatch = useDispatch();
-  // const stripe = useStripe();
-  // const elements = useElements();
 
+  const { isAuthenticated, loginWithRedirect } = useAuth0();
+
+  const makePayment = async () => {
+    if (!isAuthenticated) {
+      loginWithRedirect();
+      return;
+    }
+    const stripe = await loadStripe(
+      "pk_test_51O0qj0SCoK68ROrbLG1UaWDSQ6ZIkPONHF7dikGBKQwPqCZQRSmt9Nxfk83QpdkuuGPa0vdbgtsmPWo5HRYGMgUi00KDQ49ZJq"
+    );
+    const response = await axios.post(
+      `${import.meta.env.VITE_APP_DOMAIN}/order/create-checkout-session`,
+      {
+        products: cart,
+      }
+    );
+
+    const result = stripe.redirectToCheckout({ sessionId: response.data.id });
+    if (result.error) console.log(result.error);
+  };
   useEffect(() => {
     async function fetch() {
       const response = await handleCategoryBasedFilter("");
@@ -37,26 +50,7 @@ const Cart = () => {
     }
     fetch();
   }, []);
-  // const handleSubmit = async (event) => {
-  //   event.preventDefault();
 
-  //   if (!stripe || !elements) {
-  //     return;
-  //   }
-
-  //   const result = await stripe.confirmPayment({
-  //     elements,
-  //     confirmParams: {
-  //       return_url: "https://example.com/order/123/complete",
-  //     },
-  //   });
-
-  //   if (result.error) {
-  //     console.log(result.error.message);
-  //   } else {
-  //     // Handle successful payment
-  //   }
-  // };
   return (
     <section className="px-4 mt-10">
       <h1 className="text-black tracking-wider text-lg font-bold">
@@ -66,7 +60,7 @@ const Cart = () => {
       <div className="overflow-x-auto flexContainer flex-col lg:flex-row !items-start gap-5">
         {/* Items Listed */}
         <table
-          className="table-auto w-full border-separate border-spacing-x-10 border-spacing-y-1
+          className="table-auto w-full lg:w-[65%] border-separate border-spacing-x-10 border-spacing-y-1
         border border-slate-500/20 "
         >
           <thead>
@@ -91,12 +85,12 @@ const Cart = () => {
                   </button>
                 </td>
                 <td>
-                  <div className="flexContainer flex-col lg:flex-row gap-4">
+                  <div className="flexContainer flex-col lg:flex-row gap-4 !items-center !justify-center">
                     <img
                       src={item.images[0].url}
                       className="w-40 h-[10vh] object-cover rounded-lg"
                     />
-                    <h1 className="text-sm text-black/55 float-left w-full">
+                    <h1 className="text-sm text-center lg:text-start text-black/55  w-full">
                       {item.name}
                     </h1>
                   </div>
@@ -128,7 +122,7 @@ const Cart = () => {
                 </td>
                 <td>
                   <h1 className=" text-black/55 text-center w-full ">
-                    {item.totalPrice} BDT
+                    {item.totalPrice * 0.3} BDT
                   </h1>
                 </td>
               </tr>
@@ -142,7 +136,7 @@ const Cart = () => {
           <h1 className="font-bold text-lg mb-2">Summary</h1>
           <div className="flexContainer mb-3">
             <h1 className="text-black/55">Subtotal</h1>
-            <span className="font-semibold text-sm">{totalPrice} BDT</span>
+            <span className="font-semibold text-sm">{totalPrice * 0.3} BDT</span>
           </div>
           {/* second part */}
           <div className="flexContainer mb-3">
@@ -156,7 +150,7 @@ const Cart = () => {
             <input
               type="text"
               placeholder="Enter coupon"
-              className="py-2 px-4 bg-slate-500/10 rounded-2xl"
+              className="py-2 px-2 bg-slate-500/10 rounded-2xl"
             />
             <button className="text-white bg-orange-600 p-2 rounded-2xl">
               Apply
@@ -166,10 +160,13 @@ const Cart = () => {
           {/* Fourth part */}
           <div className="flexContainer my-3">
             <h1 className="text-black/55">Total</h1>
-            <h4 className="font-semibold text-sm">{totalPrice} BDT</h4>
+            <h4 className="font-semibold text-sm">{totalPrice * 0.3} BDT</h4>
           </div>
           {/* Fifth part */}
-          <button className="w-full bg-black/85 hover:bg-black transition-all duration-300 text-white rounded-2xl p-2">
+          <button
+            onClick={makePayment}
+            className="w-full bg-black/85 hover:bg-black transition-all duration-300 text-white rounded-2xl p-2"
+          >
             Proceed to Checkout
           </button>
         </div>

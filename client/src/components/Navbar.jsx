@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IoCartOutline, IoSearchOutline } from "react-icons/io5";
 import { AiOutlineUser } from "react-icons/ai";
 import { FaHome } from "react-icons/fa";
@@ -14,7 +14,8 @@ import MenuPopover from "./MenuPopover";
 import Login from "./pages/Login";
 import Search from "./Search";
 import Logo from "./Logo";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useAnimation } from "framer-motion";
+
 const NavLink = ({
   title,
   singleItem = "",
@@ -56,6 +57,8 @@ const Navbar = () => {
   );
   const { user, isAuthenticated } = useAuth0();
   const [menuOpen, setMenuOpen] = useState(false);
+  const controls = useAnimation();
+  console.log("the controlls are", controls);
   const handleToggleMenu = () => {
     if (menuOpen) {
       setMenuOpen(false);
@@ -80,12 +83,19 @@ const Navbar = () => {
     hidden: { x: "-100vw", opacity: 0 },
     visible: { x: 0, opacity: 1, transition: { duration: 0.3 } },
   };
+
+  useEffect(() => {
+    controls.start({
+      x: [0, -10, 10],
+      transition: { duration: 0.2, repeat: 1, repeatType: "reverse" },
+    });
+  }, [controls, totalQuantities]);
   return (
     <div className="flexContainer flex-col px-4 gap-7">
       {/* First Navbar */}
       <div className=" flexContainer mt-5 w-full">
         {/* Logo */}
-        <Link to="/" className="w-[20%] lg:w-[5%]">
+        <Link to="/" className="w-[20%] sm:w-[10%] lg:w-[5%]">
           <Logo />
         </Link>
         <div className="hidden lg:flexContainer gap-5">
@@ -105,9 +115,9 @@ const Navbar = () => {
           </div>
           <Link to="/cart" className="flexContainer gap-2">
             <IoCartOutline size={30} />
-            <span className="text-white rounded-full bg-orange-600 w-1/2 text-center  p-[2px] text-xs">
+            <motion.span animate={controls}  className="text-white rounded-full bg-orange-600 w-1/2 text-center  p-[2px] text-xs">
               {totalQuantities}
-            </span>
+            </motion.span>
           </Link>
           {isAuthenticated ? <MenuPopover user={user} /> : <Login />}
         </div>

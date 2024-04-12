@@ -39,7 +39,8 @@ const PopularCategories = () => {
               <td>Cabinets</td>
               <td>Samsung</td>
               <td>Lamp</td>
-              <td>Puma</td> <td>Denver</td>
+              <td>Puma</td>
+              <td>Denver</td>
             </tr>
             <tr>
               <td>Armchairs</td>
@@ -47,14 +48,14 @@ const PopularCategories = () => {
               <td>Table</td>
               <td>Adidas</td>
               <td>Giga</td>
-            </tr>{" "}
+            </tr>
             <tr>
               <td>Curtains</td>
               <td>Google</td>
               <td>Diven L-Shaped</td>
               <td>Jordan</td>
               <td>Yellow</td>
-            </tr>{" "}
+            </tr>
             <tr>
               <td>Bookcases</td>
               <td>Realme</td>

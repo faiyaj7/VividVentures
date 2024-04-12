@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+body{background-color: #f9efef}
 @layer components {
   .flexContainer {
     @apply flex items-center justify-between;

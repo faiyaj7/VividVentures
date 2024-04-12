@@ -1,6 +1,6 @@
 import { Fragment, useState } from "react";
 import { Listbox, Transition } from "@headlessui/react";
-// import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
+
 
 const people = [
   { name: "Default", value: 0 },
@@ -8,7 +8,7 @@ const people = [
   { name: "Price High to Low", value: -1 },
 ];
 
-export default function Example({ handleFilter }) {
+export default function Example({ handleFilter , products }) {
   const [selected, setSelected] = useState(people[0]);
   const handleFilterChange = (e) => {
     setSelected(e);

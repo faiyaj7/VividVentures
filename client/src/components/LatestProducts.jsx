@@ -14,13 +14,13 @@ const LatestProducts = () => {
     handleProduct();
   }, []);
   return (
-    <section className="flexContainer flex-col px-4 min-h-screen">
+    <section className="mt-20 lg:mt-0 flexContainer !justify-around flex-col px-4 min-h-screen">
       {/* Header */}
       <h1 className="w-full  text-black/20 tracking-wider text-6xl text-center">
         Latest Products
       </h1>
       {/* Products two part */}
-      <div className="flexContainer flex-col lg:flex-row w-full">
+      <div className="flexContainer flex-col lg:flex-row w-full gap-20">
         {/* Discounted Product */}
         <div className="border-4 border-red-600 w-full lg:w-[30%] mx-auto h-[80vh] my-10 lg:my-0">
           <h1 className="text-center w-full text-red-600 text-4xl font-semibold mt-5">

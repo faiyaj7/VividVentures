@@ -3,47 +3,83 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { addToCart } from "../../store/productSlice";
-import MultiRangeSlider from "multi-range-slider-react";
 
 import Filter from "../Filter";
 import Loader from "../Loader";
 import useDocumentTitle from "../ComponentTitle";
+import Pagination from "../Pagination";
+
 const Menu = () => {
   useDocumentTitle("VividVentures | Menu");
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [productInfo, setProductInfo] = useState({
+    productCount: 0,
+    resultPerPage: 0,
+    filteredProductsCount: 0,
+  });
   const [filteringOptions, setFilteringOptions] = useState({
     minPrice: 0,
     maxPrice: 1000000,
     category: "",
-    rating: 5,
+    rating: "",
+    page: 1,
   });
 
   const dispatch = useDispatch();
   const qty = 1;
+
+  // sorting price from high to low and vice versa
   const handleFilter = async (value) => {
     const response = await axios.post(
       `${import.meta.env.VITE_APP_DOMAIN}/products/filter`,
-      { value }
+      { value, products }
     );
 
     setProducts(response.data);
   };
-  useEffect(() => {
+
+  const handleServerFilter = async () => {
     setLoading(true);
-    async function fetch() {
+    const response = await axios.get(
+      `${import.meta.env.VITE_APP_DOMAIN}/products?category=${
+        filteringOptions.category
+      }&price[lte]=${filteringOptions.maxPrice}&price[gte]=${
+        filteringOptions.minPrice
+      }&rating=${filteringOptions.rating}&page=${filteringOptions.page}`
+    );
+
+    setProducts(response.data.products);
+    setProductInfo({
+      productCount: response.data.productCount,
+      resultPerPage: response.data.resultPerPage,
+      filteredProductsCount: response.data.filteredProductsCount,
+    });
+    setLoading(false);
+  };
+
+  // sending the filter values to the server for every input change except image
+  useEffect(() => {
+    handleServerFilter();
+  }, [
+    filteringOptions.page,
+    filteringOptions.category,
+    filteringOptions.rating,
+  ]);
+
+  // finding all the categories for filtering at initial load only
+  useEffect(() => {
+    async function findCategories() {
       const response = await axios.get(
-        `${import.meta.env.VITE_APP_DOMAIN}/products?category=${
-          filteringOptions.category
-        }&price[lte]=${filteringOptions.maxPrice}&price[gte]=${
-          filteringOptions.minPrice
-        }&rating=${filteringOptions.rating}`
+        `${import.meta.env.VITE_APP_DOMAIN}/products/group-categories`
       );
-      setProducts(response.data.products);
-      setLoading(false);
+      setCategories(response.data);
     }
-    fetch();
-  }, [filteringOptions]);
+    findCategories();
+  }, []);
+
   if (loading) return <Loader />;
   return (
     <section className="flexContainer gap-12 flex-col px-4 mt-10">
@@ -55,7 +91,8 @@ const Menu = () => {
 
         <div className="flexContainer gap-7">
           <h1 className="ml-auto w-15">Sort By</h1>
-          <Filter handleFilter={handleFilter} />
+          {/* Sorting based filter */}
+          <Filter handleFilter={handleFilter} products={products} />
         </div>
       </div>
       {/* Second part */}
@@ -72,7 +109,11 @@ const Menu = () => {
               <input
                 className="bg-slate-500/20 w-full py-1 px-2 rounded-2xl outline-none  placeholder:text-black/50 text-black/70 tracking-wider font-medium "
                 type="number"
-                value={filteringOptions.minPrice}
+                value={
+                  filteringOptions.minPrice > 0
+                    ? filteringOptions.minPrice
+                    : null
+                }
                 placeholder="Enter min price"
                 onChange={(e) => {
                   setFilteringOptions((prevState) => ({
@@ -80,11 +121,16 @@ const Menu = () => {
                     minPrice: e.target.value,
                   }));
                 }}
+                onBlur={handleServerFilter}
               />
               <input
                 className="bg-slate-500/20 py-1 px-2 rounded-2xl outline-none w-full placeholder:text-black/50 text-black/70 tracking-wider font-medium"
                 type="number"
-                value={filteringOptions.maxPrice}
+                value={
+                  filteringOptions.maxPrice < 1000000
+                    ? filteringOptions.maxPrice
+                    : null
+                }
                 placeholder="Enter max price"
                 onChange={(e) => {
                   setFilteringOptions((prevState) => ({
@@ -92,6 +138,7 @@ const Menu = () => {
                     maxPrice: e.target.value,
                   }));
                 }}
+                onBlur={handleServerFilter}
               />
             </div>
           </div>
@@ -120,55 +167,35 @@ const Menu = () => {
                 />
                 <label
                   htmlFor="default-radio-1"
-                  className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                  className="ms-2 text-sm font-medium text-gray-500 "
                 >
                   All
                 </label>
               </div>
-              <div className="flex items-center mb-4">
-                <input
-                  checked={filteringOptions.category === "furniture"}
-                  onChange={(e) => {
-                    setFilteringOptions((prevState) => ({
-                      ...prevState,
-                      category: e.target.value,
-                    }));
-                  }}
-                  id="default-radio-1"
-                  type="radio"
-                  value="furniture"
-                  name="category-radio"
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300"
-                />
-                <label
-                  htmlFor="default-radio-1"
-                  className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                >
-                  Furniture
-                </label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  checked={filteringOptions.category === "shoe"}
-                  onChange={(e) => {
-                    setFilteringOptions((prevState) => ({
-                      ...prevState,
-                      category: e.target.value,
-                    }));
-                  }}
-                  id="default-radio-2"
-                  type="radio"
-                  value="shoe"
-                  name="category-radio"
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300"
-                />
-                <label
-                  htmlFor="default-radio-2"
-                  className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                >
-                  Shoe
-                </label>
-              </div>
+              {categories.map((item) => (
+                <div className="flex items-center mb-4" key={item._id}>
+                  <input
+                    checked={filteringOptions.category === `${item._id}`}
+                    onChange={(e) => {
+                      setFilteringOptions((prevState) => ({
+                        ...prevState,
+                        category: e.target.value,
+                      }));
+                    }}
+                    id="default-radio-1"
+                    type="radio"
+                    value={`${item._id}`}
+                    name="category-radio"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300"
+                  />
+                  <label
+                    htmlFor="default-radio-1"
+                    className="ms-2 text-sm font-medium text-gray-500"
+                  >
+                    {item._id[0].toUpperCase() + item._id.slice(1)}
+                  </label>
+                </div>
+              ))}
             </div>
           </div>
           {/* Rating */}
@@ -196,7 +223,7 @@ const Menu = () => {
                 />
                 <label
                   htmlFor="default-radio-1"
-                  className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                  className="ms-2 text-sm font-medium text-gray-500"
                 >
                   1
                 </label>
@@ -218,7 +245,7 @@ const Menu = () => {
                 />
                 <label
                   htmlFor="default-radio-2"
-                  className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                  className="ms-2 text-sm font-medium text-gray-500"
                 >
                   2
                 </label>
@@ -240,7 +267,7 @@ const Menu = () => {
                 />
                 <label
                   htmlFor="default-radio-2"
-                  className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                  className="ms-2 text-sm font-medium text-gray-500"
                 >
                   3
                 </label>
@@ -262,7 +289,7 @@ const Menu = () => {
                 />
                 <label
                   htmlFor="default-radio-2"
-                  className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                  className="ms-2 text-sm font-medium text-gray-500"
                 >
                   4
                 </label>
@@ -285,7 +312,7 @@ const Menu = () => {
                 />
                 <label
                   htmlFor="default-radio-2"
-                  className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                  className="ms-2 text-sm font-medium text-gray-500"
                 >
                   5
                 </label>
@@ -298,10 +325,10 @@ const Menu = () => {
           <h1 className="w-[85%] ">No Product Present based on your filter.</h1>
         ) : (
           <div className="w-full lg:w-[85%] grid grid-cols-2 lg:grid-cols-4 gap-5 place-items-center">
-            {products.map((product, index) => (
+            {products.map((product) => (
               <div
                 className="w-full rounded-lg h-[30vh] flexContainer !justify-center flex-col gap-6 "
-                key={index}
+                key={product._id}
               >
                 <Link to={`/product/${product._id}`} className="w-full h-[75%]">
                   <img
@@ -326,6 +353,13 @@ const Menu = () => {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      <Pagination
+        filteringOptions={filteringOptions}
+        setFilteringOptions={setFilteringOptions}
+        productInfo={productInfo}
+      />
     </section>
   );
 };

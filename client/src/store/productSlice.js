@@ -31,7 +31,7 @@ const productSlice = createSlice({
     },
     addToCart(state, action) {
       let product = action.payload.product;
-
+console.log(product);
       let qty = action.payload.qty === 0 ? 1 : action.payload.qty;
       const productExist = state.cart.find((item) => item._id === product._id);
       // New product
@@ -49,7 +49,7 @@ const productSlice = createSlice({
         state.totalQuantities += qty;
         state.totalPrice += product.price * qty;
         const updatedProduct = state.cart.map((item) => {
-          if (item.id === product.id)
+          if (item._id === product._id)
             return {
               ...item,
               totalQuantity: item.totalQuantity + qty,
@@ -82,6 +82,7 @@ const productSlice = createSlice({
     },
     removeItemsFromCart(state, action) {
       // finding this product to reduce the totalPrice and totalQuantity
+      console.log(action.payload);
       let id = action.payload.id;
 
       const product = state.cart.find((item) => item._id === id);
