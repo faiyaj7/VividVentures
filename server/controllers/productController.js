@@ -9,14 +9,14 @@ export const getAllProduct = asyncTryCatch(async (req, res, next) => {
   // There are 2 ways to search
 
   // 1. make a class and a search method and use regex there
-  const resultPerPage = 20;
+  const resultPerPage = 10;
   const apifeature = new ApiFeature(Product.find(), req.query)
     .search()
-    .filter();
-  // .pagination(resultPerPage);
-  console.log(apifeature);
+    .filter()
+  .pagination(resultPerPage);
+  
   let products = await apifeature.query;
-  console.log("the products are ", products);
+  
   const filteredProductsCount = products.length;
   apifeature.pagination(resultPerPage);
   products = await apifeature.query.clone();
@@ -25,7 +25,7 @@ export const getAllProduct = asyncTryCatch(async (req, res, next) => {
   // const products = await Product.find({
   //   name: { $regex: req.query.keyword, $options: "i" },
   // });
-  console.log(products);
+ 
   res.status(200).json({
     success: true,
     products,
@@ -45,15 +45,27 @@ export const createProduct = asyncTryCatch(async (req, res, next) => {
 
 export const filterByPrice = asyncTryCatch(async (req, res, next) => {
   const sorting = req.body.value;
-  console.log("the sort value is ", sorting);
-  if (sorting === 0) {
-    const product = await Product.find();
-    res.status(200).json(product);
+  const products = req.body.products;
+
+  // First, filter the products based on the IDs received from the client
+  const filteredProducts = await Product.find({
+    _id: { $in: products }, // This filters the documents to only those with IDs in the 'products' array
+  });
+  
+let sortedProducts= []
+  // Then, sort the filtered products
+  if (sorting === 1) {
+    // price from less to high
+     sortedProducts = filteredProducts.sort((a, b) => a.price - b.price);
+     // price from high to less
+  } else if (sorting === -1) {
+     sortedProducts = filteredProducts.sort((a, b) => b.price - a.price);
   } else {
-    const product = await Product.find().sort({ price: sorting });
-    res.status(200).json(product);
+     sortedProducts = filteredProducts;
   }
+  res.status(200).json(sortedProducts)
 });
+
 export const productBasedonLatestAddition = asyncTryCatch(
   async (req, res, next) => {
     const products = await Product.find().sort({ createdTime: 1 }).limit(5);
@@ -74,28 +86,16 @@ export const productBasedOnCategory = asyncTryCatch(async (req, res, next) => {
   const productsFilteredByCategory = await Product.find(query);
   res.status(200).json({ success: true, productsFilteredByCategory });
 });
-// update Product
-// export const updateProduct = asyncTryCatch(async (req, res, next) => {
-//   const productExist = await Product.findById(req.params.id);
-//   if (!productExist)
-//     return next(new ErrorHandler("Product does not exist", 400));
-//   const updatedProduct = await Product.findByIdAndUpdate(
-//     req.params.id,
-//     req.body,
-//     { new: true, useFindAndModify: false, runValidators: true }
-//   );
-//   res.status(200).json({ success: true, updatedProduct });
-// });
 
-// // Delete Product
-// export const deleteProduct = asyncTryCatch(async (req, res, next) => {
-//   const productExist = await Product.findById(req.params.id);
-//   if (!productExist)
-//     return next(new ErrorHandler("Product does not exist", 400));
-//   // const deleteProduct = await Product.deleteOne(req.params.id);
-//   await productExist.remove();
-//   res.status(200).json({ success: true });
-// });
+// Group the categories for all products
+export const groupTheCategories = asyncTryCatch(async(req , res , next) => {
+  const categories = await Product.aggregate([
+    {$group:{
+      _id:"$category"
+    }}
+  ])
+  res.status(200).json(categories)
+})
 
 // get Single Product details
 export const singleProduct = asyncTryCatch(async (req, res, next) => {
@@ -106,52 +106,53 @@ export const singleProduct = asyncTryCatch(async (req, res, next) => {
   res.status(200).json({ success: true, product });
 });
 
-export const productPurchaseSuccessfull = asyncTryCatch(
-  async (req, res, next) => {
-    const stripe = new Stripe(process.env.NEXT_PUBLIC_STRIPE_SECRET_KEY);
+// Product purchase payment system with stripe and sanity cms (images and everything)
+// export const productPurchaseSuccessfull = asyncTryCatch(
+//   async (req, res, next) => {
+//     const stripe = new Stripe(process.env.NEXT_PUBLIC_STRIPE_SECRET_KEY);
 
-    const info = await request.json();
+//     const info = await request.json();
 
-    const params = {
-      submit_type: "pay",
-      mode: "payment",
-      payment_method_types: ["card"],
-      billing_address_collection: "auto",
-      shipping_options: [{ shipping_rate: "shr_1O1BrsSCoK68ROrb8V1ply2T" }],
-      line_items: info.map((item) => {
-        const img = item.image.asset._ref;
-        const newImage = img
-          .replace(
-            "image-",
-            "https://cdn.sanity.io/images/vfxfwnaw/production/"
-          )
-          .replace("-webp", ".webp");
-        return {
-          price_data: {
-            currency: "bdt",
-            product_data: {
-              name: item.name,
-              images: [newImage],
-            },
-            unit_amount: item.exactPrice * 100,
-          },
-          adjustable_quantity: {
-            enabled: true,
-            minimum: 1,
-          },
-          quantity: item.quantity,
-        };
-      }),
-      success_url: `${request.headers.get("origin")}/success`,
-      cancel_url: `${request.headers.get("origin")}/canceled`,
-    };
-    // Create Checkout Sessions from body params.
+//     const params = {
+//       submit_type: "pay",
+//       mode: "payment",
+//       payment_method_types: ["card"],
+//       billing_address_collection: "auto",
+//       shipping_options: [{ shipping_rate: "shr_1O1BrsSCoK68ROrb8V1ply2T" }],
+//       line_items: info.map((item) => {
+//         const img = item.image.asset._ref;
+//         const newImage = img
+//           .replace(
+//             "image-",
+//             "https://cdn.sanity.io/images/vfxfwnaw/production/"
+//           )
+//           .replace("-webp", ".webp");
+//         return {
+//           price_data: {
+//             currency: "bdt",
+//             product_data: {
+//               name: item.name,
+//               images: [newImage],
+//             },
+//             unit_amount: item.exactPrice * 100,
+//           },
+//           adjustable_quantity: {
+//             enabled: true,
+//             minimum: 1,
+//           },
+//           quantity: item.quantity,
+//         };
+//       }),
+//       success_url: `${request.headers.get("origin")}/success`,
+//       cancel_url: `${request.headers.get("origin")}/canceled`,
+//     };
+//     // Create Checkout Sessions from body params.
 
-    const session = await stripe.checkout.sessions.create(params);
+//     const session = await stripe.checkout.sessions.create(params);
 
-    return NextResponse.json({ session, status: 200 });
-  }
-);
+//     return NextResponse.json({ session, status: 200 });
+//   }
+// );
 // export const createProductReview = asyncTryCatch(async (req, res, next) => {
 //   const { rating, comment, productId } = req.body;
 

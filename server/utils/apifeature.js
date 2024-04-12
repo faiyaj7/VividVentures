@@ -11,37 +11,43 @@ class ApiFeature {
         $options: "i",
       },
     };
-    console.log({ ...keyword });
+    // console.log({ ...keyword });
     // console.log(this);
     this.query = this.query.find({ ...keyword });
     return this;
   }
   filter() {
     const duplicateQueryString = { ...this.queryStr };
-    console.log("the duplicate query str ", duplicateQueryString);
+
     const removeFields = ["keyword", "page", "limit"];
     // removing some fields for category
 
-    // If category is an empty string, remove the category filter
-    if (duplicateQueryString.category === "") {
-      delete duplicateQueryString.category;
-    } else {
+    if (
+      duplicateQueryString.rating !== "" &&
+      duplicateQueryString.category !== ""
+    ) {
       // Apply category filter
       this.query = this.query.find({
         category: duplicateQueryString.category,
+        rating: duplicateQueryString.rating,
       });
     }
+    // If category is an empty string, remove the category filter
+    if (duplicateQueryString.category === "") {
+      delete duplicateQueryString.category;
+    }
+    if (duplicateQueryString.rating === "") {
+      delete duplicateQueryString.rating;
+    }
+    
     removeFields.map((key) => delete duplicateQueryString[key]);
-
-    console.log(duplicateQueryString);
 
     // for price and rating
     let queryStr = JSON.stringify(duplicateQueryString);
-    // console.log("json stringify is ", queryStr);
+
     queryStr = queryStr.replace(/\b(gt|gte|lt|lte)\b/g, (key) => `$${key}`);
-    console.log("after json formatted", JSON.parse(queryStr));
+    // console.log("after json formatted", JSON.parse(queryStr));
     this.query = this.query.find(JSON.parse(queryStr));
-    // console.log(this.query);
 
     return this;
   }
