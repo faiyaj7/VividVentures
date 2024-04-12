@@ -58,7 +58,7 @@ const Navbar = () => {
   const { user, isAuthenticated } = useAuth0();
   const [menuOpen, setMenuOpen] = useState(false);
   const controls = useAnimation();
-  console.log("the controlls are", controls);
+  
   const handleToggleMenu = () => {
     if (menuOpen) {
       setMenuOpen(false);
