@@ -91,7 +91,7 @@ const Navbar = () => {
     });
   }, [controls, totalQuantities]);
   return (
-    <div className="flexContainer flex-col px-10 gap-7">
+    <div className="flexContainer flex-col px-10   gap-7">
       {/* First Navbar */}
       <div className=" flexContainer mt-5 w-full">
         {/* Logo */}
