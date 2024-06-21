@@ -26,10 +26,10 @@ const Cart = () => {
   const { isAuthenticated, loginWithRedirect } = useAuth0();
 
   const makePayment = async () => {
-    if (!isAuthenticated) {
-      loginWithRedirect();
-      return;
-    }
+    // if (!isAuthenticated) {
+    //   loginWithRedirect();
+    //   return;
+    // }
     const stripe = await loadStripe(
       "pk_test_51O0qj0SCoK68ROrbLG1UaWDSQ6ZIkPONHF7dikGBKQwPqCZQRSmt9Nxfk83QpdkuuGPa0vdbgtsmPWo5HRYGMgUi00KDQ49ZJq"
     );

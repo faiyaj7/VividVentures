@@ -82,7 +82,7 @@ const Menu = () => {
 
   if (loading) return <Loader />;
   return (
-    <section className="flexContainer gap-12 flex-col px-4 mt-10">
+    <section className="flexContainer gap-12 flex-col px-10 mt-10">
       {/* First part */}
       <div className="w-full flexContainer flex-col lg:flex-row gap-7">
         <h1 className="text-black/20 tracking-wider text-6xl text-center ml-[25px]">

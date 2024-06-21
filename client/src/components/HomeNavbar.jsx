@@ -84,7 +84,7 @@ const HomeNavbar = () => {
 
 
   return (
-    <div className="flexContainer !justify-between flex-col px-4 gap-7">
+    <div className="flexContainer !justify-between flex-col px-10 py-2 gap-7">
       {/* First Navbar */}
       <div className=" flexContainer mt-5 w-full">
         {/* Logo */}
